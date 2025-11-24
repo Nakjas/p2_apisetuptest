@@ -182,3 +182,34 @@ header h1 {
     color: #333;
 }
 
+.tracker-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-family: sans-serif;
+}
+
+#gameList .game-item {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#gameList .game-item h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+}
+
+#gameList .game-item p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+#gameList button:hover {
+    opacity: 0.8;
+}
