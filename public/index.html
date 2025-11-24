@@ -12,30 +12,28 @@
 </head>
 
 <body>
-    <header class="main-header">
-      <div class="header-text-content"></div>
-        <h1>Game Nexus</h1>
-        <p>Browse by filter or search for precise game details.</p>
-      </div>
-      <a href="user.html" class="user-btn-top">My Records</a>
-    </header>
+  <header>
+    <h1>Game Nexus</h1>
+    <p>Browse by filter or search for precise game details.</p>
+    <a href="user.html" class="header-btn pos-right">My Records</a>
+  </header>
     
-    <div class="container filter-bar">
-        <select id="genre-select">
-            <option value="">All Genres</option>
-        </select>
+  <div class="container filter-bar">
+    <select id="genre-select">
+      <option value="">All Genres</option>
+    </select>
         
-        <select id="year-select">
-            <option value="">All Years</option>
-        </select>
+    <select id="year-select">
+      <option value="">All Years</option>
+    </select>
         
-        <div class="search-container">
-            <input type="text" id="search-input" placeholder="Search a specific game title (e.g., Elden Ring)">
-            <div id="live-results" class="live-results"></div>
-        </div>
-        
-        <button id="search-button">Search</button>
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search a specific game title (e.g., Elden Ring)">
+      <div id="live-results" class="live-results"></div>
     </div>
+        
+    <button id="search-button">Search</button>
+  </div>
     
     <div id="list-container" class="container games-grid">
         <p>Loading popular games for browsing...</p>
