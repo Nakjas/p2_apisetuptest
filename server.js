@@ -1,24 +1,70 @@
-// Express is a framework for building APIs and web apps
-// See also: https://expressjs.com/
-import express from 'express'
-// Initialize Express app
-const app = express()
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-// Serve static files from /public folder (useful when running Node locally, optional on Vercel).
-app.use(express.static('public'))
-// Define index.html as the root explicitly (useful on Vercel, optional when running Node locally).
-app.get('/', (req, res) => { res.redirect('/index.html') })
+// Import your Model (Ensure the file extension .js is included if using ESM)
+// Check if your file is named 'gamerecords.js' inside the 'Models' folder
+import GameRecord from './Models/gamerecords.js'; 
 
-// Enable express to parse JSON data
-app.use(express.json())
+dotenv.config();
+const app = express();
+const port = process.env.PORT || 3000;
 
-// Our API is defined in a separate module to keep things tidy.
-// Let's import our API endpoints and activate them.
-import apiRoutes from './routes/api.js'
-app.use('/', apiRoutes)
+app.use(express.static('public'));
+app.use(express.json());
+app.use(cors());
 
 
-const port = 3000
+mongoose.connect(process.env.DATABASE_URL)
+  .then(() => console.log('✅ Connected to MongoDB!'))
+  .catch(err => console.error('❌ Connection Error:', err));
+
+
+app.get('/api/games', async (req, res) => {
+  try {
+    const games = await GameRecord.find().sort({ updatedAt: -1 });
+    res.json(games);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/games', async (req, res) => {
+  try {
+    const newGame = await GameRecord.create(req.body);
+    res.status(201).json(newGame);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.put('/api/games/:id', async (req, res) => {
+  try {
+    const updatedGame = await GameRecord.findByIdAndUpdate(
+      req.params.id, 
+      req.body, 
+      { new: true }
+    );
+    res.json(updatedGame);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.delete('/api/games/:id', async (req, res) => {
+  try {
+    await GameRecord.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/', (req, res) => {
+  res.redirect('/index.html');
+});
+
 app.listen(port, () => {
-    console.log(`Express is live at http://localhost:${port}`)
-})
+  console.log(`Express is live at http://localhost:${port}`);
+});
