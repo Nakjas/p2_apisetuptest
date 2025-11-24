@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Game Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav style="display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #333; color: white;">
+        <h2>👤 User Profile</h2>
+        <a href="index.html" style="color: white; text-decoration: none; border: 1px solid white; padding: 5px 15px; border-radius: 4px;">← Back to Search</a>
+    </nav>
+
+    <div class="tracker-section" style="padding: 20px;">
+        <div class="card">
+            <h3>📝 Manage Record</h3>
+            <p style="font-size: 0.8rem; color: #666;">Select a game below to fill this form, or add one manually.</p>
+            <form id="gameForm" style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="gameTitle" placeholder="Game Name" required style="padding: 10px; flex: 1;">
+                
+                <select id="status" style="padding: 10px;">
+                    <option value="Backlog">Backlog</option>
+                    <option value="Playing">Playing</option>
+                    <option value="Finished">Finished</option>
+                    <option value="Platinum">Platinum</option>
+                </select>
+
+                <input type="number" id="hours" placeholder="Hours" min="0" style="padding: 10px; width: 80px;">
+                <input type="number" id="rating" placeholder="Rate" min="1" max="5" style="padding: 10px; width: 60px;">
+                <input type="text" id="notes" placeholder="Notes..." style="padding: 10px; flex: 2;">
+                
+                <input type="hidden" id="editId">
+                <button type="submit" style="background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer;">Save</button>
+            </form>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h3>📚 My Saved Games</h3>
+            <div id="gameList">
+                <p>Loading your database...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
