@@ -1,31 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-
+  
 <head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-  <meta
-    http-equiv="X-UA-Compatible"
-    content="ie=edge"
-  >
-  <title>API Endpoints for Publishing and Searching</title>
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Nexus</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-  <main>
-    <h1 id="api-endpoints-for-publishing-and-searching">API Endpoints for Publishing and Searching</h1>
+    <header>
+        <h1>Game Nexus</h1>
+        <p>Browse by filter or search for precise game details.</p>
+    </header>
+    
+    <div class="container filter-bar">
+        <select id="genre-select">
+            <option value="">All Genres</option>
+        </select>
+        
+        <select id="year-select">
+            <option value="">All Years</option>
+        </select>
+        
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search a specific game title (e.g., Elden Ring)">
+            <div id="live-results" class="live-results"></div>
+        </div>
+        
+        <button id="search-button">Search</button>
+    </div>
+    
+    <div id="list-container" class="container games-grid">
+        <p>Loading popular games for browsing...</p>
+    </div>
 
+    <div id="detail-container" class="container detail-view">
+        </div>
+    
+    <div id="loading-more" class="container loading-more">Loading more results...</div>
 
-    <div id="content"></div>
-  </main>
-  <script src="script.js"></script>
+    <footer>
+        <p>DESN31927 Project 1 - Dynamic Data and Third-Party APIs</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 
 </html>
