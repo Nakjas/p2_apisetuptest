@@ -64,6 +64,4 @@ app.get('/', (req, res) => {
   res.redirect('/index.html');
 });
 
-app.listen(port, () => {
-  console.log(`Express is live at http://localhost:${port}`);
-});
+export default app;
