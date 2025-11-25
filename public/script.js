@@ -211,60 +211,81 @@ window.backToList = function() {
     LIST_CONTAINER.style.display = 'grid';
 }
 
-// 全局变量：暂存当前要添加的游戏名
 let pendingGameName = '';
 
-// 1. 点击 "+ Add" 按钮时触发：只负责打开弹窗
 window.quickAddGame = function(gameName) {
-    pendingGameName = gameName; // 记住这个游戏名
+    pendingGameName = gameName;
     
-    // 更新弹窗里的文字
-    document.getElementById('modalGameName').textContent = gameName;
-    
-    // 显示弹窗
-    document.getElementById('customModal').style.display = 'flex';
-}
+    const modal = document.getElementById('customModal');
+    const title = document.getElementById('modalTitle');
+    const text = document.getElementById('modalText');
+    const actionsDefault = document.getElementById('modalActionsDefault');
+    const actionsSuccess = document.getElementById('modalActionsSuccess');
 
-// 2. 点击弹窗里的 "Cancel"：关闭弹窗
-window.closeModal = function() {
-    document.getElementById('customModal').style.display = 'none';
-    pendingGameName = ''; // 清空暂存
-}
-
-// 3. 点击弹窗里的 "Confirm"：真正执行保存
-document.getElementById('confirmAddBtn').addEventListener('click', async () => {
-    if (!pendingGameName) return;
-
-    const gameName = pendingGameName; // 拿到刚才存的名字
-    closeModal(); // 先关弹窗
-
-    // --- 下面是原本的保存逻辑 ---
-    try {
-        const response = await fetch(LOCAL_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                gameTitle: gameName,
-                status: 'Backlog',
-                hoursPlayed: 0,
-                userRating: null,
-                notes: 'Added from search result'
-            })
-        });
-
-        if (response.ok) {
-            if(confirm('✅ Saved! Go to My Records to edit details?')) {
-                window.location.href = 'user.html';
-            }
-        } else {
-            const err = await response.json();
-            alert(`Failed to save: ${err.error || 'Server error'}`);
+    if (!modal || !title || !text) {
+        if(confirm(`Add "${gameName}" to your backlog?`)) {
+            alert("Please add modal HTML to index.html");
         }
-    } catch (e) {
-        console.error(e);
-        alert('Error: Could not connect to backend.');
+        return;
     }
-});
+    
+    title.textContent = 'Track your game?';
+    text.innerHTML = `Do you want to add <span style="font-weight:bold;color:#2980b9;">${gameName}</span> to your backlog?`;
+
+    if(actionsDefault) actionsDefault.style.display = 'flex';
+    if(actionsSuccess) actionsSuccess.style.display = 'none';
+    
+    modal.style.display = 'flex';
+}
+
+window.closeModal = function() {
+    const modal = document.getElementById('customModal');
+    if(modal) modal.style.display = 'none';
+    pendingGameName = '';
+}
+
+const confirmBtn = document.getElementById('confirmAddBtn');
+if (confirmBtn) {
+    confirmBtn.addEventListener('click', async () => {
+        if (!pendingGameName) return;
+
+        try {
+            const response = await fetch(LOCAL_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    gameTitle: pendingGameName,
+                    status: 'Backlog',
+                    hoursPlayed: 0,
+                    userRating: null,
+                    notes: 'Added from search result'
+                })
+            });
+
+            if (response.ok) {
+                const title = document.getElementById('modalTitle');
+                const text = document.getElementById('modalText');
+                const actionsDefault = document.getElementById('modalActionsDefault');
+                const actionsSuccess = document.getElementById('modalActionsSuccess');
+
+                if(title) title.textContent = 'Saved Successfully!';
+                if(text) text.textContent = 'Game has added to your tracking list. Do you want to edit details now?';
+                
+                if(actionsDefault) actionsDefault.style.display = 'none'; 
+                if(actionsSuccess) actionsSuccess.style.display = 'flex'; 
+                
+            } else {
+                const err = await response.json();
+                alert(`Failed to save: ${err.error}`);
+                closeModal();
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Error: Could not connect to backend.');
+            closeModal();
+        }
+    });
+}
 
 function initUserPage() {
     loadSavedGames();
@@ -349,3 +370,4 @@ async function handleFormSubmit(e) {
         loadSavedGames();
     }
 }
+
