@@ -14,8 +14,8 @@ app.use(express.json());
 app.use(cors());
 
 mongoose.connect(process.env.DATABASE_URL)
-  .then(() => console.log('✅ Connected to MongoDB!'))
-  .catch(err => console.error('❌ Connection Error:', err));
+  .then(() => console.log('Connected to MongoDB!'))
+  .catch(err => console.error('Connection Error:', err));
 
 
 app.get('/api/games', async (req, res) => {
@@ -29,6 +29,12 @@ app.get('/api/games', async (req, res) => {
 
 app.post('/api/games', async (req, res) => {
   try {
+    const existingGame = await GameRecord.findOne({ gameTitle: req.body.gameTitle });
+    
+    if (existingGame) {
+      return res.status(400).json({ error: '⚠️ This game is already in your list!' });
+    }
+
     const newGame = await GameRecord.create(req.body);
     res.status(201).json(newGame);
   } catch (error) {
