@@ -1,8 +1,8 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
+import { mongoReady } from './database.js';
 import GameRecord from './Models/gamerecords.js'; 
 
 dotenv.config();
@@ -13,12 +13,8 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(cors());
 
-mongoose.connect(process.env.DATABASE_URL)
-  .then(() => console.log('Connected to MongoDB!'))
-  .catch(err => console.error('Connection Error:', err));
 
-
-app.get('/api/games', async (req, res) => {
+app.get('/api/games', mongoReady, async (req, res) => {
   try {
     const games = await GameRecord.find().sort({ updatedAt: -1 });
     res.json(games);
@@ -27,7 +23,7 @@ app.get('/api/games', async (req, res) => {
   }
 });
 
-app.post('/api/games', async (req, res) => {
+app.post('/api/games', mongoReady, async (req, res) => {
   try {
     const existingGame = await GameRecord.findOne({ gameTitle: req.body.gameTitle });
     
@@ -42,7 +38,7 @@ app.post('/api/games', async (req, res) => {
   }
 });
 
-app.put('/api/games/:id', async (req, res) => {
+app.put('/api/games/:id', mongoReady, async (req, res) => {
   try {
     const updatedGame = await GameRecord.findByIdAndUpdate(
       req.params.id, 
@@ -55,7 +51,7 @@ app.put('/api/games/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/games/:id', async (req, res) => {
+app.delete('/api/games/:id', mongoReady, async (req, res) => {
   try {
     await GameRecord.findByIdAndDelete(req.params.id);
     res.json({ message: 'Deleted successfully' });
