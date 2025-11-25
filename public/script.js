@@ -211,94 +211,123 @@ window.backToList = function() {
     LIST_CONTAINER.style.display = 'grid';
 }
 
-let pendingGameName = '';
 
-window.quickAddGame = function(gameName) {
-    pendingGameName = gameName;
-    
+let currentAction = '';
+let targetData = null;
+
+function openModal(type, data) {
     const modal = document.getElementById('customModal');
     const title = document.getElementById('modalTitle');
     const text = document.getElementById('modalText');
-    const actionsDefault = document.getElementById('modalActionsDefault');
-    const actionsSuccess = document.getElementById('modalActionsSuccess');
-
-    if (!modal || !title || !text) {
-        if(confirm(`Add "${gameName}" to your backlog?`)) {
-            alert("Please add modal HTML to index.html");
+    const defaultBtns = document.getElementById('modalActionsDefault');
+    const successBtns = document.getElementById('modalActionsSuccess');
+    
+    if (!modal) {
+        if(type === 'delete') {
+            if(confirm('Delete record?')) performDelete(data);
+        } else if(type === 'add') {
+            if(confirm('Add game?')) performAdd(data);
         }
         return;
     }
-    
-    title.textContent = 'Track your game?';
-    text.innerHTML = `Do you want to add <span style="font-weight:bold;color:#2980b9;">${gameName}</span> to your backlog?`;
 
-    const stayBtn = actionsSuccess.querySelector('button:first-child'); 
-    const profileBtn = actionsSuccess.querySelector('button:last-child');
-    if(stayBtn) stayBtn.textContent = 'Stay Here';
-    if(profileBtn) profileBtn.style.display = 'inline-block';
+    if(defaultBtns) defaultBtns.style.display = 'flex';
+    if(successBtns) successBtns.style.display = 'none';
 
-    if(actionsDefault) actionsDefault.style.display = 'flex';
-    if(actionsSuccess) actionsSuccess.style.display = 'none';
-    
+    if (type === 'add') {
+        currentAction = 'add';
+        targetData = data;
+        title.textContent = 'Track this game?';
+        text.innerHTML = `Do you want to add <span style="color:#2980b9;font-weight:bold;">${data}</span> to your backlog?`;
+    } 
+    else if (type === 'delete') {
+        currentAction = 'delete';
+        targetData = data;
+        title.textContent = 'Delete this record?';
+        text.innerHTML = 'Are you sure? This action cannot be undone. ';
+    }
+
     modal.style.display = 'flex';
 }
 
 window.closeModal = function() {
     const modal = document.getElementById('customModal');
     if(modal) modal.style.display = 'none';
-    pendingGameName = '';
+    currentAction = '';
+    targetData = null;
 }
 
-const confirmBtn = document.getElementById('confirmAddBtn');
+window.quickAddGame = function(gameName) {
+    openModal('add', gameName);
+}
+
+window.deleteGame = function(id) {
+    openModal('delete', id);
+}
+
+const confirmBtn = document.getElementById('confirmAddBtn') || document.getElementById('confirmActionBtn');
+
 if (confirmBtn) {
     confirmBtn.addEventListener('click', async () => {
-        if (!pendingGameName) return;
+        if (!targetData) return;
 
-        try {
-            const response = await fetch(LOCAL_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    gameTitle: pendingGameName,
-                    status: 'Backlog',
-                    hoursPlayed: 0,
-                    userRating: null,
-                    notes: 'Added from search result'
-                })
-            });
+        const title = document.getElementById('modalTitle');
+        const text = document.getElementById('modalText');
+        const defaultBtns = document.getElementById('modalActionsDefault');
+        const successBtns = document.getElementById('modalActionsSuccess');
+        
+        const stayBtn = successBtns ? successBtns.querySelector('button:first-child') : null;
+        const profileBtn = successBtns ? successBtns.querySelector('button:last-child') : null;
 
-            const title = document.getElementById('modalTitle');
-            const text = document.getElementById('modalText');
-            const actionsDefault = document.getElementById('modalActionsDefault');
-            const actionsSuccess = document.getElementById('modalActionsSuccess');
-            
-            const stayBtn = actionsSuccess.querySelector('button:first-child'); 
-            const profileBtn = actionsSuccess.querySelector('button:last-child');
+        if (currentAction === 'add') {
+            try {
+                const response = await fetch(LOCAL_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        gameTitle: targetData,
+                        status: 'Backlog',
+                        hoursPlayed: 0,
+                        userRating: null,
+                        notes: 'Added from search'
+                    })
+                });
 
-            if (response.ok) {
-                if(title) title.textContent = 'Saved Successfully!';
-                if(text) text.textContent = 'Game added to your backlog. Do you want to edit details now?';
-                
-                if(stayBtn) stayBtn.textContent = 'Close';
-                if(profileBtn) profileBtn.style.display = 'inline-block';
+                if (response.ok) {
+                    if(title) title.textContent = 'Saved!';
+                    if(text) text.textContent = 'Game added successfully.';
+                    
+                    if(stayBtn) stayBtn.textContent = 'Keep Browsing';
+                    if(profileBtn) profileBtn.style.display = 'inline-block';
 
-            } else {
-                const err = await response.json();
-                
-                if(title) title.textContent = 'Oops?!';
-                if(text) text.textContent = err.error || 'Unknown error occurred.'; 
-                
-                if(profileBtn) profileBtn.style.display = 'none';
-                if(stayBtn) stayBtn.textContent = 'Close';
+                    if(defaultBtns) defaultBtns.style.display = 'none';
+                    if(successBtns) successBtns.style.display = 'flex';
+                } else {
+                    const err = await response.json();
+                    if(title) title.textContent = 'Opps?!';
+                    if(text) text.textContent = err.error || 'Failed to save.';
+                    
+                    if(profileBtn) profileBtn.style.display = 'none';
+                    if(stayBtn) stayBtn.textContent = 'Close';
+
+                    if(defaultBtns) defaultBtns.style.display = 'none';
+                    if(successBtns) successBtns.style.display = 'flex';
+                }
+            } catch (e) {
+                alert('Connection Error');
+                closeModal();
             }
-
-            if(actionsDefault) actionsDefault.style.display = 'none'; 
-            if(actionsSuccess) actionsSuccess.style.display = 'flex'; 
-
-        } catch (e) {
-            console.error(e);
-            alert('Error: Could not connect to backend.');
-            closeModal();
+        } 
+        
+        else if (currentAction === 'delete') {
+            try {
+                await fetch(`${LOCAL_API_URL}/${targetData}`, { method: 'DELETE' });
+                closeModal();
+                loadSavedGames();
+            } catch (e) {
+                alert('Delete failed');
+                closeModal();
+            }
         }
     });
 }
@@ -353,12 +382,6 @@ window.editGame = function(id, title, status, hours, rating, notes) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-window.deleteGame = async function(id) {
-    if(!confirm('Delete record?')) return;
-    await fetch(`${LOCAL_API_URL}/${id}`, { method: 'DELETE' });
-    loadSavedGames();
-}
-
 async function handleFormSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('editId').value;
@@ -386,4 +409,3 @@ async function handleFormSubmit(e) {
         loadSavedGames();
     }
 }
-

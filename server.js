@@ -32,7 +32,7 @@ app.post('/api/games', async (req, res) => {
     const existingGame = await GameRecord.findOne({ gameTitle: req.body.gameTitle });
     
     if (existingGame) {
-      return res.status(400).json({ error: '⚠️ This game is already in your list!' });
+      return res.status(400).json({ error: 'This game is already in your list.' });
     }
 
     const newGame = await GameRecord.create(req.body);
