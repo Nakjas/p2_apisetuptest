@@ -3,8 +3,6 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-// Import your Model (Ensure the file extension .js is included if using ESM)
-// Check if your file is named 'gamerecords.js' inside the 'Models' folder
 import GameRecord from './Models/gamerecords.js'; 
 
 dotenv.config();
@@ -14,7 +12,6 @@ const port = process.env.PORT || 3000;
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cors());
-
 
 mongoose.connect(process.env.DATABASE_URL)
   .then(() => console.log('✅ Connected to MongoDB!'))

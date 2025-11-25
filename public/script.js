@@ -18,7 +18,6 @@ const MY_GAME_LIST = document.getElementById('gameList');
 let nextPageUrl = null;
 let debounceTimer;
 
-
 document.addEventListener('DOMContentLoaded', () => {
     if (LIST_CONTAINER) {
         console.log("Initializing Project 1 (Search)...");
@@ -30,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initUserPage();
     }
 });
-
 
 async function initSearchPage() {
     if (SEARCH_BUTTON) SEARCH_BUTTON.addEventListener('click', handleMainSearchClick);
@@ -49,7 +47,6 @@ async function initSearchPage() {
     populateYears();
     fetchList(`${GAMES_API_URL}?key=${API_KEY}&ordering=-rating&page_size=15`);
 }
-
 
 async function populateGenres() {
     try {
@@ -213,8 +210,6 @@ window.backToList = function() {
     DETAIL_CONTAINER.style.display = 'none';
     LIST_CONTAINER.style.display = 'grid';
 }
-
-
 
 window.quickAddGame = async function(gameName) {
     if(!confirm(`Add "${gameName}" to your Backlog?`)) return;
