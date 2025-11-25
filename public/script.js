@@ -232,6 +232,11 @@ window.quickAddGame = function(gameName) {
     title.textContent = 'Track your game?';
     text.innerHTML = `Do you want to add <span style="font-weight:bold;color:#2980b9;">${gameName}</span> to your backlog?`;
 
+    const stayBtn = actionsSuccess.querySelector('button:first-child'); 
+    const profileBtn = actionsSuccess.querySelector('button:last-child');
+    if(stayBtn) stayBtn.textContent = 'Stay Here';
+    if(profileBtn) profileBtn.style.display = 'inline-block';
+
     if(actionsDefault) actionsDefault.style.display = 'flex';
     if(actionsSuccess) actionsSuccess.style.display = 'none';
     
@@ -262,23 +267,34 @@ if (confirmBtn) {
                 })
             });
 
-            if (response.ok) {
-                const title = document.getElementById('modalTitle');
-                const text = document.getElementById('modalText');
-                const actionsDefault = document.getElementById('modalActionsDefault');
-                const actionsSuccess = document.getElementById('modalActionsSuccess');
+            const title = document.getElementById('modalTitle');
+            const text = document.getElementById('modalText');
+            const actionsDefault = document.getElementById('modalActionsDefault');
+            const actionsSuccess = document.getElementById('modalActionsSuccess');
+            
+            const stayBtn = actionsSuccess.querySelector('button:first-child'); 
+            const profileBtn = actionsSuccess.querySelector('button:last-child');
 
+            if (response.ok) {
                 if(title) title.textContent = 'Saved Successfully!';
-                if(text) text.textContent = 'Game has added to your tracking list. Do you want to edit details now?';
+                if(text) text.textContent = 'Game added to your backlog. Do you want to edit details now?';
                 
-                if(actionsDefault) actionsDefault.style.display = 'none'; 
-                if(actionsSuccess) actionsSuccess.style.display = 'flex'; 
-                
+                if(stayBtn) stayBtn.textContent = 'Close';
+                if(profileBtn) profileBtn.style.display = 'inline-block';
+
             } else {
                 const err = await response.json();
-                alert(`Failed to save: ${err.error}`);
-                closeModal();
+                
+                if(title) title.textContent = 'Oops?!';
+                if(text) text.textContent = err.error || 'Unknown error occurred.'; 
+                
+                if(profileBtn) profileBtn.style.display = 'none';
+                if(stayBtn) stayBtn.textContent = 'Close';
             }
+
+            if(actionsDefault) actionsDefault.style.display = 'none'; 
+            if(actionsSuccess) actionsSuccess.style.display = 'flex'; 
+
         } catch (e) {
             console.error(e);
             alert('Error: Could not connect to backend.');
