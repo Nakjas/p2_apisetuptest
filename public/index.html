@@ -48,6 +48,18 @@
         <p>DESN31927 Project 1 - Dynamic Data and Third-Party APIs</p>
     </footer>
 
+    <div id="customModal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3>Track this game?</h3>
+            <p>Do you want to add <span id="modalGameName" style="font-weight: bold; color: #2980b9;"></span> to your backlog?</p>
+            
+            <div class="modal-actions">
+                <button onclick="closeModal()" class="btn-cancel">Cancel</button>
+                <button id="confirmAddBtn" class="btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 

@@ -211,9 +211,34 @@ window.backToList = function() {
     LIST_CONTAINER.style.display = 'grid';
 }
 
-window.quickAddGame = async function(gameName) {
-    if(!confirm(`Add "${gameName}" to your Backlog?`)) return;
+// 全局变量：暂存当前要添加的游戏名
+let pendingGameName = '';
 
+// 1. 点击 "+ Add" 按钮时触发：只负责打开弹窗
+window.quickAddGame = function(gameName) {
+    pendingGameName = gameName; // 记住这个游戏名
+    
+    // 更新弹窗里的文字
+    document.getElementById('modalGameName').textContent = gameName;
+    
+    // 显示弹窗
+    document.getElementById('customModal').style.display = 'flex';
+}
+
+// 2. 点击弹窗里的 "Cancel"：关闭弹窗
+window.closeModal = function() {
+    document.getElementById('customModal').style.display = 'none';
+    pendingGameName = ''; // 清空暂存
+}
+
+// 3. 点击弹窗里的 "Confirm"：真正执行保存
+document.getElementById('confirmAddBtn').addEventListener('click', async () => {
+    if (!pendingGameName) return;
+
+    const gameName = pendingGameName; // 拿到刚才存的名字
+    closeModal(); // 先关弹窗
+
+    // --- 下面是原本的保存逻辑 ---
     try {
         const response = await fetch(LOCAL_API_URL, {
             method: 'POST',
@@ -223,23 +248,23 @@ window.quickAddGame = async function(gameName) {
                 status: 'Backlog',
                 hoursPlayed: 0,
                 userRating: null,
-                notes: 'Added from search'
+                notes: 'Added from search result'
             })
         });
 
         if (response.ok) {
-            if(confirm('Saved! Go to My Records to edit?')) {
+            if(confirm('✅ Saved! Go to My Records to edit details?')) {
                 window.location.href = 'user.html';
             }
         } else {
             const err = await response.json();
-            alert(`Failed to save: ${err.error || 'Server validation error'}`);
+            alert(`Failed to save: ${err.error || 'Server error'}`);
         }
     } catch (e) {
         console.error(e);
         alert('Error: Could not connect to backend.');
     }
-}
+});
 
 function initUserPage() {
     loadSavedGames();
