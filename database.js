@@ -1,16 +1,10 @@
 import mongoose from 'mongoose';
 
-const dbUrl = process.env.DATABASE_URL;
-
-if (!dbUrl) {
-  console.error('DATABASE_URL environment variable not found.');
-}
-
-let connectionPromise = null;
+let connection = null;
 
 function connectToDatabase() {
-  if (!connectionPromise) {
-    connectionPromise = mongoose.connect(dbUrl)
+  if (!connection) {
+    connection = mongoose.connect(process.env.DATABASE_URL)
       .then(mongooseInstance => {
         console.log(`Mongoose ${mongooseInstance.version} connected to MongoDB.`);
         console.log(`Host: ${mongooseInstance.connection.host}`);
@@ -20,11 +14,11 @@ function connectToDatabase() {
         console.log('MongoDB connection failed.');
         console.log(error.message);
         // Allow future retries
-        connectionPromise = null;
+        connection = null;
         throw error;
       });
   }
-  return connectionPromise;
+  return connection;
 }
 
 async function mongoReady(req, res, next) {
