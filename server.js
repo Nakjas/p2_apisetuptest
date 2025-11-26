@@ -1,11 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 
 import { mongoReady } from './database.js';
-import GameRecord from './Models/gamerecords.js'; 
+import GameRecord from './Models/gamerecords.js';
 
-dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -26,7 +24,7 @@ app.get('/api/games', mongoReady, async (req, res) => {
 app.post('/api/games', mongoReady, async (req, res) => {
   try {
     const existingGame = await GameRecord.findOne({ gameTitle: req.body.gameTitle });
-    
+
     if (existingGame) {
       return res.status(400).json({ error: 'This game is already in your list.' });
     }
@@ -41,8 +39,8 @@ app.post('/api/games', mongoReady, async (req, res) => {
 app.put('/api/games/:id', mongoReady, async (req, res) => {
   try {
     const updatedGame = await GameRecord.findByIdAndUpdate(
-      req.params.id, 
-      req.body, 
+      req.params.id,
+      req.body,
       { new: true }
     );
     res.json(updatedGame);
@@ -64,4 +62,6 @@ app.get('/', (req, res) => {
   res.redirect('/index.html');
 });
 
-export default app;
+app.listen(port, () => {
+  console.log(`App listening on http://localhost:${port}`);
+});

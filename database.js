@@ -1,32 +1,35 @@
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 
-dotenv.config();
+let connection = null;
 
-const dbUrl = process.env.DATABASE_URL;
-
-mongoose.connect(dbUrl)
-  .then(mongoose => {
-    console.log(`Mongoose ${mongoose.version} connected to MongoDB.`);
-    console.log(`Host: ${mongoose.connection.host}`);
-  })
-  .catch(error => handleError(error));
-
-const handleError = (error) => {
-  console.log("MongoDB connection failed.");
-  console.log(error.message);
-  if (dbUrl) {
-     console.log("Current Connection String is set.");
-  } else {
-     console.log("DATABASE_URL environment variable not found.");
+function connectToDatabase() {
+  if (!connection) {
+    connection = mongoose.connect(process.env.DATABASE_URL)
+      .then(mongooseInstance => {
+        console.log(`Mongoose ${mongooseInstance.version} connected to MongoDB.`);
+        console.log(`Host: ${mongooseInstance.connection.host}`);
+        return mongooseInstance;
+      })
+      .catch(error => {
+        console.log('MongoDB connection failed.');
+        console.log(error.message);
+        // Allow future retries
+        connection = null;
+        throw error;
+      });
   }
+  return connection;
 }
 
-function mongoReady(req, res, next) {
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({ error: 'Database connection not ready' });
+async function mongoReady(req, res, next) {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    return res
+      .status(503)
+      .json({ error: 'Database connection not ready' });
   }
-  next();
 }
 
 export { mongoReady };
