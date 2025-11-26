@@ -32,4 +32,4 @@ async function mongoReady(req, res, next) {
   }
 }
 
-export { mongoReady, connectToDatabase };
+export { mongoReady };
