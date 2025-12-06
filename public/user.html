@@ -43,7 +43,11 @@
                 </div>
 
                 <div class="form-row">
-                    <input type="text" id="gameTags" placeholder="Tags (comma separated, e.g. RPG, 2024)" class="input-std">
+                    <div class="tag-input-wrapper" id="tagWrapper" onclick="document.getElementById('tagInput').focus()">
+                        <span id="tagsContainer"></span>
+        
+                        <input type="text" id="tagInput" placeholder="Type tag & hit Enter" class="input-transparent">
+                    </div>
                 </div>
 
                 <div class="form-row">

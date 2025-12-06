@@ -357,6 +357,57 @@ function initUserPage() {
     if (GAME_FORM) {
         GAME_FORM.addEventListener('submit', handleFormSubmit);
     }
+
+    let currentFormTags = [];
+
+    function initUserPage() {
+        loadSavedGames();
+
+        if (GAME_FORM) {
+            GAME_FORM.addEventListener('submit', handleFormSubmit);
+        }
+    
+        const tagInput = document.getElementById('tagInput');
+        if (tagInput) {
+            tagInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const val = tagInput.value.trim();
+                    if (val && !currentFormTags.includes(val)) {
+                        currentFormTags.push(val);
+                        renderInputTags();
+                        tagInput.value = '';
+                    }
+                }
+                else if (e.key === 'Backspace' && tagInput.value === '' && currentFormTags.length > 0) {
+                    currentFormTags.pop();
+                    renderInputTags();
+                }
+            });
+        }
+    }
+
+    function renderInputTags() {
+        const container = document.getElementById('tagsContainer');
+        if (!container) return;
+    
+        container.innerHTML = '';
+    
+        currentFormTags.forEach((tag, index) => {
+            const span = document.createElement('span');
+            span.className = 'tag-chip';
+            span.innerHTML = `
+                ${tag} 
+                <span class="tag-close" onclick="removeTag(${index})">&times;</span>
+            `;
+            container.appendChild(span);
+        });
+    }
+
+    window.removeTag = function(index) {
+        currentFormTags.splice(index, 1);
+        renderInputTags();
+    }
 }
 
 async function loadSavedGames() {
@@ -436,6 +487,7 @@ window.editGame = function(id, title, status, hours, rating, notes) {
     } else {
         document.getElementById('gameTags').value = '';
     }
+    renderInputTags();
     document.getElementById('notes').value = notes;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -443,14 +495,12 @@ window.editGame = function(id, title, status, hours, rating, notes) {
 async function handleFormSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('editId').value;
-    const tagInput = document.getElementById('gameTags').value;
-    const tagArray = tagInput ? tagInput.split(',').map(t => t.trim()).filter(t => t) : [];
     const payload = {
         gameTitle: document.getElementById('gameTitle').value,
         status: document.getElementById('status').value,
         hoursPlayed: document.getElementById('hours').value,
         userRating: document.getElementById('rating').value,
-        tags: tagArray,
+        tags: currentFormTags,
         notes: document.getElementById('notes').value
     };
 
@@ -467,6 +517,9 @@ async function handleFormSubmit(e) {
         alert('Saved!');
         GAME_FORM.reset();
         document.getElementById('editId').value = '';
+
+        currentFormTags = [];
+        renderInputTags();
         loadSavedGames();
     }
 }
