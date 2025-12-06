@@ -281,16 +281,21 @@ header p {
 }
 
 .tag-chip {
-    background-color: #f0f2f5;
-    color: #34495e;
-    padding: 5px 10px;
-    border-radius: 3px;
-    font-size: 0.9em;
-    display: flex;
+    display: inline-flex; 
     align-items: center;
     gap: 6px;
-    user-select: none;
+    
+    background-color: #f0f2f5;
+    color: #34495e;
     border: 1px solid #6f7274;
+    
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    user-select: none;
+    margin: 2px;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .tag-close {
