@@ -43,6 +43,10 @@
                 </div>
 
                 <div class="form-row">
+                    <input type="text" id="gameTags" placeholder="Tags (comma separated, e.g. RPG, 2024)" class="input-std">
+                </div>
+
+                <div class="form-row">
                     <input type="text" id="notes" placeholder="Notes..." class="input-std">
                 </div>
                 
@@ -56,6 +60,9 @@
 
         <div class="card">
             <h2>Saved Games</h2>
+            <div style="margin-bottom: 20px;">
+                <input type="text" id="tagFilterInput" oninput="handleTagSearch()" placeholder="Filter by #tag..." class="input-std" style="width: 100%; max-width: 300px;">
+            </div>
             <div id="gameList">
                 <p>Loading your database...</p>
             </div>

@@ -17,6 +17,7 @@ const MY_GAME_LIST = document.getElementById('gameList');
 
 let nextPageUrl = null;
 let debounceTimer;
+let allMyGames = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     if (LIST_CONTAINER) {
@@ -122,6 +123,10 @@ async function fetchAndDisplayDetail(id) {
         const game = await response.json();
         
         const safeName = game.name.replace(/'/g, "\\'");
+        
+        // --- auto grab year and genre ---
+        const releaseYear = game.released ? game.released.split('-')[0] : '';
+        const genreTags = game.genres ? game.genres.map(g => g.name).join(',') : '';
 
         DETAIL_CONTAINER.innerHTML = `
             <div class="detail-image">
@@ -132,7 +137,7 @@ async function fetchAndDisplayDetail(id) {
                 <span class="metascore">${game.metacritic || 'N/A'}</span>
                 
                 <div style="margin: 20px 0;">
-                    <button onclick="quickAddGame('${safeName}')" style="background:#2ecc71; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">
+                    <button onclick="quickAddGame('${safeName}', '${releaseYear}', '${genreTags}')" style="background:#2ecc71; color:white; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; font-weight:bold;">
                         + Add to My Records
                     </button>
                 </div>
@@ -142,6 +147,7 @@ async function fetchAndDisplayDetail(id) {
             </div>
         `;
     } catch (e) {
+        console.error(e);
         DETAIL_CONTAINER.innerHTML = '<p>Error loading details.</p>';
     }
 }
@@ -257,8 +263,13 @@ window.closeModal = function() {
     targetData = null;
 }
 
-window.quickAddGame = function(gameName) {
-    openModal('add', gameName);
+window.quickAddGame = function(gameName, year, genres) {
+    const gameData = {
+        name: gameName,
+        year: year,
+        genres: genres
+    };
+    openModal('add', gameData);
 }
 
 window.deleteGame = function(id) {
@@ -281,15 +292,23 @@ if (confirmBtn) {
 
         if (currentAction === 'add') {
             try {
+                let autoTags = [];
+                if (targetData.year) autoTags.push(targetData.year);
+                if (targetData.genres) {
+                    const genreList = targetData.genres.split(',');
+                    autoTags = autoTags.concat(genreList);
+                }
+
                 const response = await fetch(LOCAL_API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        gameTitle: targetData,
+                        gameTitle: targetData.name || targetData,
                         status: 'Backlog',
                         hoursPlayed: 0,
                         userRating: null,
-                        notes: 'Added from search'
+                        notes: 'Added from search API',
+                        tags: autoTags
                     })
                 });
 
@@ -343,33 +362,67 @@ function initUserPage() {
 async function loadSavedGames() {
     try {
         const res = await fetch(LOCAL_API_URL);
-        const games = await res.json();
-        
-        MY_GAME_LIST.innerHTML = '';
-        if (games.length === 0) {
-            MY_GAME_LIST.innerHTML = '<p style="text-align:center; padding:20px;">No records found.</p>';
-            return;
-        }
-
-        games.forEach(game => {
-            const div = document.createElement('div');
-            div.className = 'game-item';
-            div.innerHTML = `
-                <div style="flex-grow:1;">
-                    <h3>${game.gameTitle} <span style="font-size:0.8em; background:#ecf0f1; padding:2px 6px; border-radius:4px;">${game.status}</span></h3>
-                    <p style="font-size:0.9em; color:#666;">⏳ ${game.hoursPlayed || 0}h | ⭐ ${game.userRating || '-'}/5 | 📝 ${game.notes || ''}</p>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button onclick="editGame('${game._id}', '${game.gameTitle.replace(/'/g, "\\'")}', '${game.status}', ${game.hoursPlayed}, ${game.userRating}, '${game.notes || ''}')" style="background:#3498db; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Edit</button>
-                    <button onclick="deleteGame('${game._id}')" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Delete</button>
-                </div>
-            `;
-            MY_GAME_LIST.appendChild(div);
-        });
+        allMyGames = await res.json();
+        renderGamesList(allMyGames);
     } catch (e) {
         console.error(e);
         MY_GAME_LIST.innerHTML = '<p>Error loading database.</p>';
     }
+}
+
+function renderGamesList(games) {
+    MY_GAME_LIST.innerHTML = '';
+    if (games.length === 0) {
+        MY_GAME_LIST.innerHTML = '<p style="text-align:center; padding:20px;">No games found.</p>';
+        return;
+    }
+
+    games.forEach(game => {
+        const tagsHtml = (game.tags && game.tags.length > 0) 
+            ? game.tags.map(tag => 
+                `<span onclick="clickTag('${tag}')" 
+                       style="background:#e0f7fa; color:#006064; padding:2px 8px; border-radius:12px; font-size:0.8em; margin-right:5px; cursor:pointer; border:1px solid #b2ebf2; display:inline-block;">
+                   #${tag}
+                 </span>`
+              ).join('') 
+            : '';
+
+        const safeTitle = game.gameTitle.replace(/'/g, "\\'");
+        const safeNotes = (game.notes || '').replace(/'/g, "\\'");
+        const safeTags = JSON.stringify(game.tags || []).replace(/"/g, "&quot;");
+
+        const div = document.createElement('div');
+        div.className = 'game-item';
+        div.innerHTML = `
+            <div style="flex-grow:1;">
+                <h3>${game.gameTitle} <span style="font-size:0.8em; background:#ecf0f1; padding:2px 6px; border-radius:4px;">${game.status}</span></h3>
+                <div style="margin: 8px 0;">${tagsHtml}</div>
+                <p style="font-size:0.9em; color:#666;">⏳ ${game.hoursPlayed || 0}h | ⭐ ${game.userRating || '-'}/5 | 📝 ${game.notes || ''}</p>
+            </div>
+            <div style="display:flex; gap:10px; align-items: flex-start;">
+                <button onclick='editGame("${game._id}", "${safeTitle}", "${game.status}", ${game.hoursPlayed}, ${game.userRating}, "${safeNotes}", ${safeTags})' style="background:#3498db; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Edit</button>
+                <button onclick="deleteGame('${game._id}')" style="background:#e74c3c; color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Delete</button>
+            </div>
+        `;
+        MY_GAME_LIST.appendChild(div);
+    });
+}
+
+window.handleTagSearch = function() {
+    const term = document.getElementById('tagFilterInput').value.toLowerCase().trim();
+    if (!term) {
+        renderGamesList(allMyGames);
+        return;
+    }
+    const filtered = allMyGames.filter(game => 
+        game.tags && game.tags.some(tag => tag.toLowerCase().includes(term))
+    );
+    renderGamesList(filtered);
+}
+
+window.clickTag = function(tag) {
+    document.getElementById('tagFilterInput').value = tag;
+    handleTagSearch();
 }
 
 window.editGame = function(id, title, status, hours, rating, notes) {
@@ -378,6 +431,11 @@ window.editGame = function(id, title, status, hours, rating, notes) {
     document.getElementById('status').value = status;
     document.getElementById('hours').value = hours;
     document.getElementById('rating').value = rating;
+    if (tags && Array.isArray(tags)) {
+        document.getElementById('gameTags').value = tags.join(', ');
+    } else {
+        document.getElementById('gameTags').value = '';
+    }
     document.getElementById('notes').value = notes;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -385,11 +443,14 @@ window.editGame = function(id, title, status, hours, rating, notes) {
 async function handleFormSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('editId').value;
+    const tagInput = document.getElementById('gameTags').value;
+    const tagArray = tagInput ? tagInput.split(',').map(t => t.trim()).filter(t => t) : [];
     const payload = {
         gameTitle: document.getElementById('gameTitle').value,
         status: document.getElementById('status').value,
         hoursPlayed: document.getElementById('hours').value,
         userRating: document.getElementById('rating').value,
+        tags: tagArray,
         notes: document.getElementById('notes').value
     };
 
