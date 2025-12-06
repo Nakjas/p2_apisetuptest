@@ -429,8 +429,7 @@ function renderGamesList(games) {
     games.forEach(game => {
         const tagsHtml = (game.tags && game.tags.length > 0) 
             ? game.tags.map(tag => 
-                `<span onclick="clickTag('${tag}')" 
-                       style="background:#e0f7fa; color:#006064; padding:2px 8px; border-radius:12px; font-size:0.8em; margin-right:5px; cursor:pointer; border:1px solid #b2ebf2; display:inline-block;">
+                `<span class="tag-chip" onclick="clickTag('${tag}')">
                    #${tag}
                  </span>`
               ).join('') 

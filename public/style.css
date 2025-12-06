@@ -281,16 +281,16 @@ header p {
 }
 
 .tag-chip {
-    background-color: #e0f7fa;
-    color: #006064;
+    background-color: #f0f2f5;
+    color: #34495e;
     padding: 5px 10px;
-    border-radius: 1px;
+    border-radius: 3px;
     font-size: 0.9em;
     display: flex;
     align-items: center;
     gap: 6px;
     user-select: none;
-    border: 1px solid #b2ebf2;
+    border: 1px solid #6f7274;
 }
 
 .tag-close {
@@ -300,8 +300,8 @@ header p {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
     border-radius: 50%;
 }
 
@@ -358,7 +358,31 @@ header p {
 }
 
 select.floating-input {
-    appearance: none;
-    -webkit-appearance: none;
     padding-top: 22px;
+    padding-bottom: 5px;
+    cursor: pointer;
+}
+
+.tag-input-wrapper {
+    flex: 1;
+    box-sizing: border-box; 
+    min-height: 50px; 
+    display: flex;
+    align-items: center;
+    width: auto;
+}
+
+.form-row .floating-group {
+    flex: 1;
+    width: auto;
+}
+
+.floating-input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.three-col-layout {
+    justify-content: space-between;
+    gap: 0;
 }
