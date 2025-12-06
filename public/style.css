@@ -316,16 +316,21 @@ header p {
 }
 
 
+.floating-group {
+    position: relative;
+    width: 100%;
+}
+
 .three-col-layout {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    gap: 5%;
+    gap: 0;
 }
 
 .three-col-layout .floating-group {
-    width: 25%; 
-    position: relative;
+    width: 30%;
+    flex: 0 0 30%;
 }
 
 .floating-input {
@@ -368,26 +373,16 @@ select.floating-input {
     cursor: pointer;
 }
 
-.tag-input-wrapper {
-    flex: 1;
-    box-sizing: border-box; 
-    min-height: 50px; 
-    display: flex;
-    align-items: center;
-    width: auto;
-}
-
 .form-row .floating-group {
-    flex: 1;
-    width: auto;
+    flex: 1; 
 }
 
-.floating-input {
-    width: 100%;
-    box-sizing: border-box;
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
-.three-col-layout {
-    justify-content: space-between;
-    gap: 0;
+input[type=number] {
+    appearance: textfield;
 }
