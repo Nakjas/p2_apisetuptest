@@ -358,56 +358,65 @@ function initUserPage() {
         GAME_FORM.addEventListener('submit', handleFormSubmit);
     }
 
-    let currentFormTags = [];
+let currentFormTags = [];
 
-    function initUserPage() {
-        loadSavedGames();
+function initUserPage() {
+    loadSavedGames();
 
-        if (GAME_FORM) {
-            GAME_FORM.addEventListener('submit', handleFormSubmit);
-        }
-    
-        const tagInput = document.getElementById('tagInput');
-        if (tagInput) {
-            tagInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const val = tagInput.value.trim();
-                    if (val && !currentFormTags.includes(val)) {
-                        currentFormTags.push(val);
-                        renderInputTags();
-                        tagInput.value = '';
-                    }
-                }
-                else if (e.key === 'Backspace' && tagInput.value === '' && currentFormTags.length > 0) {
-                    currentFormTags.pop();
+    if (GAME_FORM) {
+        GAME_FORM.removeEventListener('submit', handleFormSubmit);
+        GAME_FORM.addEventListener('submit', handleFormSubmit);
+    }
+
+    const tagInput = document.getElementById('tagInput');
+    if (tagInput) {
+        const newTagInput = tagInput.cloneNode(true);
+        tagInput.parentNode.replaceChild(newTagInput, tagInput);
+        
+        newTagInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = newTagInput.value.trim();
+                if (val && !currentFormTags.includes(val)) {
+                    currentFormTags.push(val);
                     renderInputTags();
+                    newTagInput.value = '';
                 }
-            });
-        }
-    }
-
-    function renderInputTags() {
-        const container = document.getElementById('tagsContainer');
-        if (!container) return;
-    
-        container.innerHTML = '';
-    
-        currentFormTags.forEach((tag, index) => {
-            const span = document.createElement('span');
-            span.className = 'tag-chip';
-            span.innerHTML = `
-                ${tag} 
-                <span class="tag-close" onclick="removeTag(${index})">&times;</span>
-            `;
-            container.appendChild(span);
+            }
+            else if (e.key === 'Backspace' && newTagInput.value === '' && currentFormTags.length > 0) {
+                currentFormTags.pop();
+                renderInputTags();
+            }
         });
+        
+        document.getElementById('tagWrapper').onclick = function() {
+            newTagInput.focus();
+        };
     }
+}
 
-    window.removeTag = function(index) {
-        currentFormTags.splice(index, 1);
-        renderInputTags();
-    }
+function renderInputTags() {
+    const container = document.getElementById('tagsContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    currentFormTags.forEach((tag, index) => {
+        const span = document.createElement('span');
+        span.className = 'tag-chip';
+        span.innerHTML = `
+            ${tag} 
+            <span class="tag-close" onclick="window.removeTag(${index})">&times;</span>
+        `;
+        container.appendChild(span);
+    });
+}
+
+window.removeTag = function(index) {
+    currentFormTags.splice(index, 1);
+    renderInputTags();
+}
+
 }
 
 async function loadSavedGames() {
