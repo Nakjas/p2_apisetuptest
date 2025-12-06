@@ -18,15 +18,14 @@ const MY_GAME_LIST = document.getElementById('gameList');
 let nextPageUrl = null;
 let debounceTimer;
 let allMyGames = [];
+let currentFormTags = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     if (LIST_CONTAINER) {
-        console.log("Initializing Project 1 (Search)...");
         initSearchPage();
     }
 
     if (MY_GAME_LIST) {
-        console.log("Initializing Project 2 (Database)...");
         initUserPage();
     }
 });
@@ -59,7 +58,7 @@ async function populateGenres() {
             option.textContent = genre.name;
             GENRE_SELECT.appendChild(option);
         });
-    } catch (e) { console.error("Genre Error:", e); }
+    } catch (e) { console.error(e); }
 }
 
 function populateYears() {
@@ -124,7 +123,6 @@ async function fetchAndDisplayDetail(id) {
         
         const safeName = game.name.replace(/'/g, "\\'");
         
-        // --- auto grab year and genre ---
         const releaseYear = game.released ? game.released.split('-')[0] : '';
         const genreTags = game.genres ? game.genres.map(g => g.name).join(',') : '';
 
@@ -244,7 +242,7 @@ function openModal(type, data) {
         currentAction = 'add';
         targetData = data;
         title.textContent = 'Track this game?';
-        text.innerHTML = `Do you want to add <span style="color:#2980b9;font-weight:bold;">${data}</span> to your backlog?`;
+        text.innerHTML = `Do you want to add <span style="color:#2980b9;font-weight:bold;">${data.name || data}</span> to your backlog?`;
     } 
     else if (type === 'delete') {
         currentAction = 'delete';
@@ -355,15 +353,6 @@ function initUserPage() {
     loadSavedGames();
 
     if (GAME_FORM) {
-        GAME_FORM.addEventListener('submit', handleFormSubmit);
-    }
-
-let currentFormTags = [];
-
-function initUserPage() {
-    loadSavedGames();
-
-    if (GAME_FORM) {
         GAME_FORM.removeEventListener('submit', handleFormSubmit);
         GAME_FORM.addEventListener('submit', handleFormSubmit);
     }
@@ -417,8 +406,6 @@ window.removeTag = function(index) {
     renderInputTags();
 }
 
-}
-
 async function loadSavedGames() {
     try {
         const res = await fetch(LOCAL_API_URL);
@@ -426,12 +413,14 @@ async function loadSavedGames() {
         renderGamesList(allMyGames);
     } catch (e) {
         console.error(e);
-        MY_GAME_LIST.innerHTML = '<p>Error loading database.</p>';
+        if(MY_GAME_LIST) MY_GAME_LIST.innerHTML = '<p>Error loading database.</p>';
     }
 }
 
 function renderGamesList(games) {
+    if(!MY_GAME_LIST) return;
     MY_GAME_LIST.innerHTML = '';
+    
     if (games.length === 0) {
         MY_GAME_LIST.innerHTML = '<p style="text-align:center; padding:20px;">No games found.</p>';
         return;
@@ -448,7 +437,7 @@ function renderGamesList(games) {
             : '';
 
         const safeTitle = game.gameTitle.replace(/'/g, "\\'");
-        const safeNotes = (game.notes || '').replace(/'/g, "\\'");
+        const safeNotes = (game.notes || '').replace(/'/g, "\\'").replace(/\n/g, " "); 
         const safeTags = JSON.stringify(game.tags || []).replace(/"/g, "&quot;");
 
         const div = document.createElement('div');
@@ -469,7 +458,10 @@ function renderGamesList(games) {
 }
 
 window.handleTagSearch = function() {
-    const term = document.getElementById('tagFilterInput').value.toLowerCase().trim();
+    const input = document.getElementById('tagFilterInput');
+    if(!input) return;
+    const term = input.value.toLowerCase().trim();
+    
     if (!term) {
         renderGamesList(allMyGames);
         return;
@@ -481,54 +473,69 @@ window.handleTagSearch = function() {
 }
 
 window.clickTag = function(tag) {
-    document.getElementById('tagFilterInput').value = tag;
-    handleTagSearch();
+    const input = document.getElementById('tagFilterInput');
+    if(input) {
+        input.value = tag;
+        handleTagSearch();
+    }
 }
 
-window.editGame = function(id, title, status, hours, rating, notes) {
+window.editGame = function(id, title, status, hours, rating, notes, tags) {
     document.getElementById('editId').value = id;
     document.getElementById('gameTitle').value = title;
     document.getElementById('status').value = status;
     document.getElementById('hours').value = hours;
     document.getElementById('rating').value = rating;
+    document.getElementById('notes').value = notes;
+
     if (tags && Array.isArray(tags)) {
-        document.getElementById('gameTags').value = tags.join(', ');
+        currentFormTags = [...tags];
     } else {
-        document.getElementById('gameTags').value = '';
+        currentFormTags = [];
     }
     renderInputTags();
-    document.getElementById('notes').value = notes;
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function handleFormSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('editId').value;
+    
     const payload = {
         gameTitle: document.getElementById('gameTitle').value,
         status: document.getElementById('status').value,
         hoursPlayed: document.getElementById('hours').value,
         userRating: document.getElementById('rating').value,
-        tags: currentFormTags,
+        tags: currentFormTags, 
         notes: document.getElementById('notes').value
     };
 
     const method = id ? 'PUT' : 'POST';
     const url = id ? `${LOCAL_API_URL}/${id}` : LOCAL_API_URL;
 
-    const res = await fetch(url, {
-        method: method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    });
+    try {
+        const res = await fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
 
-    if (res.ok) {
-        alert('Saved!');
-        GAME_FORM.reset();
-        document.getElementById('editId').value = '';
+        if (res.ok) {
+            alert('Saved!');
+            GAME_FORM.reset();
+            document.getElementById('editId').value = '';
 
-        currentFormTags = [];
-        renderInputTags();
-        loadSavedGames();
+            currentFormTags = [];
+            renderInputTags();
+            
+            loadSavedGames();
+        } else {
+            const err = await res.json();
+            alert('Error: ' + err.error);
+        }
+    } catch (error) {
+        console.error(error);
+        alert('Connection failed');
     }
 }
