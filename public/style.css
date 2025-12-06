@@ -264,7 +264,7 @@ header p {
     gap: 8px;
     padding: 8px 12px;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 2px;
     background-color: white;
     min-height: 45px;
     cursor: text;
@@ -284,7 +284,7 @@ header p {
     background-color: #e0f7fa;
     color: #006064;
     padding: 5px 10px;
-    border-radius: 20px;
+    border-radius: 2px;
     font-size: 0.9em;
     display: flex;
     align-items: center;
