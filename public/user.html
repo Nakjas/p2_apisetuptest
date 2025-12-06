@@ -28,19 +28,26 @@
                     <input type="text" id="gameTitle" placeholder="Game Name" required class="input-std">
                 </div>
 
-                <div class="form-row">
-                    <select id="status" class="input-std">
+            <div class="form-row three-col-layout">
+
+                <div class="floating-group">
+                    <select id="status" class="input-std floating-input">
                         <option value="Backlog">In Waitlist</option>
                         <option value="Playing">Now Playing</option>
                         <option value="Finished">Game Clear</option>
-                        <option value="Platinum">All Archivement</option>
+                        <option value="Platinum">All Achievement</option>
                     </select>
+                    <label class="floating-label label-fixed">Status</label>
                 </div>
-
-                <div class="form-row">
-                    <input type="number" id="hours" placeholder="Hours" min="0" class="input-std">
-                    <input type="number" id="rating" placeholder="Rate" min="1" max="5" class="input-std">
+                <div class="floating-group">
+                    <input type="number" id="hours" class="input-std floating-input" placeholder=" " min="0">
+                    <label class="floating-label">Hours</label>
                 </div>
+                <div class="floating-group">
+                    <input type="number" id="rating" class="input-std floating-input" placeholder=" " min="1" max="5">
+                    <label class="floating-label">Rate (1-5)</label>
+                </div>
+            </div>
 
                 <div class="form-row">
                     <div class="tag-input-wrapper" id="tagWrapper" onclick="document.getElementById('tagInput').focus()">

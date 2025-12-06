@@ -284,7 +284,7 @@ header p {
     background-color: #e0f7fa;
     color: #006064;
     padding: 5px 10px;
-    border-radius: 2px;
+    border-radius: 1px;
     font-size: 0.9em;
     display: flex;
     align-items: center;
@@ -308,4 +308,57 @@ header p {
 .tag-close:hover {
     background-color: rgba(0,0,0,0.1);
     color: #c0392b;
+}
+
+
+.three-col-layout {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 5%;
+}
+
+.three-col-layout .floating-group {
+    width: 25%; 
+    position: relative;
+}
+
+.floating-input {
+    width: 100%;
+    height: 50px;
+    padding-top: 20px;
+    padding-bottom: 5px;
+    padding-left: 12px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background: white;
+    font-size: 1rem;
+}
+
+.floating-label {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    font-size: 1em;
+    color: #999;
+    pointer-events: none;
+    transition: 0.2s ease all;
+}
+
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label,
+.label-fixed {
+    top: 8px;
+    font-size: 0.75em;
+    color: #2980b9;
+    font-weight: bold;
+    transform: none;
+}
+
+select.floating-input {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-top: 22px;
 }
