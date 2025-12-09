@@ -375,16 +375,16 @@ function initUserPage() {
                     }
                 });
             
-            renderTags();
+            renderInputTags();
             tagInput.value = '';
         } else if (e.key === 'Backspace' && tagInput.value === '' && currentFormTags.length > 0) {
             currentFormTags.pop();
-            renderTags();
+            renderInputTags();
         }
     });
         
         document.getElementById('tagWrapper').onclick = function() {
-            newTagInput.focus();
+            tagInput.focus();
         };
     }
 }
