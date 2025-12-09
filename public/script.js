@@ -357,26 +357,31 @@ function initUserPage() {
         GAME_FORM.addEventListener('submit', handleFormSubmit);
     }
 
-    const tagInput = document.getElementById('tagInput');
-    if (tagInput) {
-        const newTagInput = tagInput.cloneNode(true);
-        tagInput.parentNode.replaceChild(newTagInput, tagInput);
+    const oldElement = document.getElementById('tagInput');
+    if (oldElement) {
+        const tagInput = oldElement.cloneNode(true);
+        oldElement.parentNode.replaceChild(tagInput, oldElement);
         
-        newTagInput.addEventListener('keydown', function(e) {
+        tagInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                const val = newTagInput.value.trim();
-                if (val && !currentFormTags.includes(val)) {
-                    currentFormTags.push(val);
-                    renderInputTags();
-                    newTagInput.value = '';
-                }
-            }
-            else if (e.key === 'Backspace' && newTagInput.value === '' && currentFormTags.length > 0) {
-                currentFormTags.pop();
-                renderInputTags();
-            }
-        });
+            
+                const rawValue = tagInput.value;
+                const newTags = rawValue.split(/[,，\s]+/).map(t => t.trim()).filter(t => t);
+            
+                newTags.forEach(tag => {
+                    if (tag && !currentFormTags.includes(tag)) {
+                        currentFormTags.push(tag);
+                    }
+                });
+            
+            renderTags();
+            tagInput.value = '';
+        } else if (e.key === 'Backspace' && tagInput.value === '' && currentFormTags.length > 0) {
+            currentFormTags.pop();
+            renderTags();
+        }
+    });
         
         document.getElementById('tagWrapper').onclick = function() {
             newTagInput.focus();
